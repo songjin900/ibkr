@@ -12,7 +12,7 @@ import pytz
 STOCK_NAME = 'TSLA'
 STOCK_QUANTITY = 1
 BUY_PRICE = 0
-
+#
 util.startLoop()  # uncomment this line when in a notebook
 # python3 demo.py
 ib = IB()
