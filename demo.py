@@ -14,14 +14,13 @@ import pytz
 environemnt = 'prod'
 mode = 'min'
 
-# util.startLoop()  # uncomment this line when in a notebook
+util.startLoop()  # uncomment this line when in a notebook
 # python3 demo.py
 ib = IB()
 ib.connect('127.0.0.1', 7497, clientId=1)
 
 account_info = ib.accountValues()
 positions = util.df(account_info)
-
 open_positions = ib.positions()
 
 # Convert the open positions data to a DataFrame for easier processing
@@ -98,8 +97,8 @@ for index, row in macd(df).iterrows():
             macDDate = macD_date
             break
 
-if not macDDate:
-    sys.exit()
+# if not macDDate:
+#     sys.exit()
 
 print(f'macDDate is {macDDate}')
 
@@ -160,4 +159,4 @@ if time_difference <= timedelta(minutes=1):
 
 # ib.pendingTickersEvent += onPendingTicker
 
-# ib.run()
+ib.run()
