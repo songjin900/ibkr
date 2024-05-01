@@ -47,12 +47,15 @@ while not hasPosition:
     ib.sleep(1)
 
     ticker = ib.reqMktData(stock)
+    BUY_PRICE = ticker.marketPrice()
+    print("\nCurrent Price:", BUY_PRICE)
+
     bars = ib.reqHistoricalData(
         stock, endDateTime='', durationStr='1 D',
         barSizeSetting='1 min', whatToShow='TRADES', useRTH=True)
 
     loop_count = loop_count + 1
-    print(f"loopCount: {loop_count}")
+    print(f"loop count: {loop_count}")
     df = util.df(bars)
 
     [dateStochastic, k, d] = stochastic(df)
@@ -80,7 +83,10 @@ while not hasPosition:
     print(f"stochastic overSold Date: {stochasticOverSoldDate}")
     print(f"stochastic overBought Date: {stochasticOverBoughtDate}")
 
-    if (stochasticOverSoldDate > stochasticOverBoughtDate ):
+    stochasticOverSoldDate = datetime.strptime(str(stochasticOverSoldDate), "%Y-%m-%d %H:%M:%S%z")
+    stochasticOverBoughtDate = datetime.strptime(str(stochasticOverBoughtDate), "%Y-%m-%d %H:%M:%S%z")
+
+    if (stochasticOverSoldDate < stochasticOverBoughtDate ):
          continue
 
     for index, row in macd(df).iterrows():
@@ -103,15 +109,43 @@ while not hasPosition:
 
     print(f'macD date: {macDDate}')
 
-    for index, row in rsi(df).iterrows():
+    # for index, row in rsi(df).iterrows():
+    #     date_rsi = row['Date']
+    #     current_rsi = row['RSI']
+
+    #     if index > 0 and rsi(df):
+    #         previous_rsi = rsi(df).iloc[index - 1]
+    #         if (date_rsi >= macDDate and current_rsi >= 50):
+    #             rsiDate = date_rsi
+    #             break
+
+    # for index, row in rsi_df.iterrows():
+    #     date_rsi = row['Date']
+    #     current_rsi = row['RSI']
+
+    #     if index > 0:
+            
+    #         # previous_rsi = rsi_df.iloc[index - 1]['RSI']  # Assuming you want the previous RSI value
+    #         if date_rsi >= macDDate and current_rsi >= 50:
+    #             rsiDate = date_rsi
+    #             break
+    
+    previous_rsi = None
+
+    rsi_df = rsi(df)
+
+    for index, row in rsi_df.iterrows():
         date_rsi = row['Date']
         current_rsi = row['RSI']
 
-        if index > 0:
-            previous_rsi = rsi(df).iloc[index-1]
-            if (date_rsi >= macDDate and current_rsi >= 50):
+        # Skip the first row because there's no previous RSI value
+        if previous_rsi is not None:
+            if date_rsi >= macDDate and current_rsi >= 50 and current_rsi > previous_rsi:
                 rsiDate = date_rsi
                 break
+
+        # Update previous_rsi for the next iteration
+        previous_rsi = current_rsi
     
     if (not rsiDate):
         print(f'no rsi signal')
@@ -129,9 +163,9 @@ while not hasPosition:
         # Get the current price of the stock
         BUY_PRICE = ticker.marketPrice()
 
-        print("Current Price:", BUY_PRICE)
+        print("*****************************************Current Price:", round(BUY_PRICE,2))
         # Create a limit order
-        order = LimitOrder('BUY', STOCK_QUANTITY, BUY_PRICE)  # Buy 100 shares of TSLA at $700 per share
+        order = LimitOrder('BUY', STOCK_QUANTITY, round(BUY_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
 
         # Place the order
         orderId = ib.placeOrder(stock, order)
