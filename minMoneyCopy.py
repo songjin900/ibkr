@@ -12,6 +12,8 @@ import pytz
 STOCK_NAME = 'TSLA'
 STOCK_QUANTITY = 1
 BUY_PRICE = 0
+GAIN = 0.005
+LOSS = 0.005
 #
 util.startLoop()  # uncomment this line when in a notebook
 # python3 demo.py
@@ -21,6 +23,7 @@ ib.connect('127.0.0.1', 7497, clientId=1)
 account_info = ib.accountValues()
 positions = util.df(account_info)
 open_positions = ib.positions()
+
 
 # Convert the open positions data to a DataFrame for easier processing
 positions_df = util.df(open_positions)
@@ -181,9 +184,14 @@ while not hasPosition:
 while hasPosition: 
     for position in open_positions:
         if (position.contract.symbol == STOCK_NAME):
-            order = LimitOrder('SELL', STOCK_QUANTITY, BUY_PRICE * 1.005)
-            orderId = ib.placeOrder(stock, order)
-            hasPosition = False 
+            current_price = ticker.marketPrice()
+            if (current_price < BUY_PRICE  * (1-LOSS)):
+                order = MarketOrder('SELL', STOCK_QUANTITY)
+                trade = ib.placeOrder(stock, order)
+            elif (current_price > (BUY_PRICE) * (1+GAIN)):
+                order = LimitOrder('SELL', STOCK_QUANTITY, BUY_PRICE * (1+GAIN))
+                orderId = ib.placeOrder(stock, order)
+                hasPosition = False 
 
 
 
