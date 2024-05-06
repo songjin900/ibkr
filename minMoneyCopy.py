@@ -201,10 +201,14 @@ while hasPosition:
         print(positions_df.to_string())
 
         if (position.contract.symbol == STOCK_NAME):
-            print("submitting orders")
-            order = LimitOrder('SELL', STOCK_QUANTITY, BUY_PRICE * 1.005)
-            orderId = ib.placeOrder(stock, order)
-            hasPosition = False 
+            current_price = ticker.marketPrice()
+            if (current_price < BUY_PRICE  * (1-LOSS)):
+                order = MarketOrder('SELL', STOCK_QUANTITY)
+                trade = ib.placeOrder(stock, order)
+            elif (current_price > (BUY_PRICE) * (1+GAIN)):
+                order = LimitOrder('SELL', STOCK_QUANTITY, BUY_PRICE * (1+GAIN))
+                orderId = ib.placeOrder(stock, order)
+                hasPosition = False 
 
 
 
