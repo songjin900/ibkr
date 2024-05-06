@@ -12,6 +12,8 @@ import pytz
 STOCK_NAME = 'TSLA'
 STOCK_QUANTITY = 8
 BUY_PRICE = 0
+GAIN = 0.005
+LOSS = 0.005
 #
 util.startLoop()  # uncomment this line when in a notebook
 # python3 demo.py
@@ -21,6 +23,7 @@ ib.connect('127.0.0.1', 7497, clientId=1)
 account_info = ib.accountValues()
 positions = util.df(account_info)
 open_positions = ib.positions()
+
 
 # Convert the open positions data to a DataFrame for easier processing
 positions_df = util.df(open_positions)
