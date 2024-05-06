@@ -10,10 +10,8 @@ from datetime import datetime, timedelta
 import pytz
 
 STOCK_NAME = 'TSLA'
-STOCK_QUANTITY = 8
+STOCK_QUANTITY = 12
 BUY_PRICE = 0
-GAIN = 0.005
-LOSS = 0.005
 #
 util.startLoop()  # uncomment this line when in a notebook
 # python3 demo.py
@@ -23,7 +21,6 @@ ib.connect('127.0.0.1', 7497, clientId=1)
 account_info = ib.accountValues()
 positions = util.df(account_info)
 open_positions = ib.positions()
-
 
 # Convert the open positions data to a DataFrame for easier processing
 positions_df = util.df(open_positions)
@@ -194,21 +191,21 @@ while not hasPosition:
          continue
 
 while hasPosition: 
+    ib = IB()
+    ib.connect('127.0.0.1', 7497, clientId=1)
+    account_info = ib.accountValues()
+    positions = util.df(account_info)
     open_positions = ib.positions()
-    for position in open_positions:
+    for position in open_positions:        
         print(position.contract.symbol)
         print(STOCK_NAME)
         print(positions_df.to_string())
 
         if (position.contract.symbol == STOCK_NAME):
-            current_price = ticker.marketPrice()
-            if (current_price < BUY_PRICE  * (1-LOSS)):
-                order = MarketOrder('SELL', STOCK_QUANTITY)
-                trade = ib.placeOrder(stock, order)
-            elif (current_price > (BUY_PRICE) * (1+GAIN)):
-                order = LimitOrder('SELL', STOCK_QUANTITY, BUY_PRICE * (1+GAIN))
-                orderId = ib.placeOrder(stock, order)
-                hasPosition = False 
+            print("submitting orders")
+            order = LimitOrder('SELL', STOCK_QUANTITY, BUY_PRICE * 1.004)
+            orderId = ib.placeOrder(stock, order)
+            hasPosition = False 
 
 
 
