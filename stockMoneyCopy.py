@@ -11,8 +11,8 @@ import pytz
 STOCK_NAME = 'TSLA'
 STOCK_QUANTITY = 12
 BUY_PRICE = 0
-GAIN = 0.005
-LOSS = 0.005
+GAIN = 0.003
+LOSS = 0.003
 
 #
 util.startLoop()  # uncomment this line when in a notebook
@@ -196,8 +196,6 @@ while not hasPosition:
 
 while hasPosition: 
     current_price = ticker.marketPrice()
-    trade = ""
-    print(f"current price: {round(current_price,2)}")
     if round(current_price,2) >= round(BUY_PRICE * (1+GAIN),2):
         order = LimitOrder('SELL', STOCK_QUANTITY, round(BUY_PRICE * (1+GAIN),2))
         print ("**** Order Submitted with GAIN ****")
@@ -224,6 +222,12 @@ while hasPosition:
         print("*************** Order is Filled *************")
         playMusic()
         hasPosition = False 
+
+    else:
+        print(f"current price: {round(current_price,2)}")
+        print("waiting...")
+        ib.sleep(1)
+
 
     
     
