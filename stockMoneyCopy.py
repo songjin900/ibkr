@@ -13,6 +13,8 @@ STOCK_QUANTITY = 12
 BUY_PRICE = 0
 GAIN = 0.003
 LOSS = 0.003
+GAINSIG = 0.002
+LOSSSIG = 0.002
 
 #
 util.startLoop()  # uncomment this line when in a notebook
@@ -225,6 +227,8 @@ while hasPosition:
 
     else:
         print(f"current price: {round(current_price,2)}")
+        print(f"purchased price: { round(BUY_PRICE,2)}")
+        print(f"target price: {round(BUY_PRICE * (1+GAIN),2)} and {round(BUY_PRICE * (1-LOSS),2)}")
         print("waiting...")
         ib.sleep(1)
 
