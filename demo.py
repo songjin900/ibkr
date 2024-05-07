@@ -27,136 +27,26 @@ open_positions = ib.positions()
 positions_df = util.df(open_positions)
 
 # Print or manipulate the DataFrame as needed
-print("Current Holdings:")
-print(positions_df.to_string())
-print(positions_df)
+# print("Current Holdings:")
+# print(positions_df.to_string())
+# print(positions_df)
 
 # prod: 7497, Dev: 4002
 stock = Stock('TSLA','SMART', 'USD')
 
-bars = ib.reqHistoricalData(
-    stock, endDateTime='', durationStr='180 D',
-    barSizeSetting='1 day', whatToShow='TRADES', useRTH=True)
-
-if (mode == 'min'):
-    bars = ib.reqHistoricalData(
-        stock, endDateTime='', durationStr='1 D',
-        barSizeSetting='1 min', whatToShow='TRADES', useRTH=True)
+print("Time 'b' is within +- one minute from the current time.")
+order = MarketOrder('Buy', 1)
+trade = ib.placeOrder(stock, order)
 
 
+# # Define order status handler
+# def order_status_handler(order):
+#     print("Order status:", order.status)
 
-# convert to pandas dataframe (pandas
-# needs to be installed):
-df = util.df(bars)
+# # Register the order status handler
+# ib.orderStatusEvent += order_status_handler
 
-#print (df.to_string())
-
-# sys.exit()
-
-[dateStochastic, k, d] = stochastic(df)
-
-stochasticOverSoldDate = ""
-stochasticOverBoughtDate = ""
-
-for index, row in stochastic(df).iterrows():
-    date = row['Date']
-    percent_k = row['%K']
-    percent_d = row['%D']
-
-    if (index > 0):
-        previous_row = stochastic(df).iloc[index - 1]
-        previous_k = previous_row['%K']
-        previous_d = previous_row['%D']
-
-        if (previous_k < previous_d and percent_k > percent_d and percent_k < 20 and percent_d < 20):
-                    stochasticOverSoldDate = date
-
-        if (previous_k > previous_d and percent_k < percent_d and percent_k > 80 and percent_d > 80):
-                    stochasticOverBoughtDate = date
-
-##
-print(f"stochastic overSold Date: {stochasticOverSoldDate}")
-print(f"stochastic overBought Date: {stochasticOverBoughtDate}")
-
-if (stochasticOverSoldDate < stochasticOverBoughtDate ):
-    sys.exit()
-
-macDDate = ""
-
-for index, row in macd(df).iterrows():
-    macD_date = row['Date']
-    macDLine = row['MACD']
-    signal = row['Signal']
-
-    if index > 0:
-        previous_row = macd(df).iloc[index - 1]
-        previous_macd = previous_row['MACD']
-        previous_signal = previous_row['Signal']
-
-        if macD_date >= stochasticOverSoldDate and macDLine > signal and previous_macd < previous_signal:
-            macDDate = macD_date
-            break
-
-# if not macDDate:
-#     sys.exit()
-
-print(f'macDDate is {macDDate}')
-
-rsiDate = ""
-
-if (macDDate):
-
-    for index, row in rsi(df).iterrows():
-        date_rsi = row['Date']
-        current_rsi = row['RSI']
-
-        if index > 0:
-            previous_rsi = rsi(df).iloc[index-1]
-            if (date_rsi >= macDDate and current_rsi >= 50):
-                rsiDate = date_rsi
-                break
-
-print(f"recent date for rsi is {rsiDate}")
-
-
-# Get the current time
-current_time = datetime.now(pytz.utc)
-
-# Check if 'b' is within +- one minute from the current time
-time_difference = abs(current_time - rsiDate)
-
-if time_difference <= timedelta(minutes=1):
-    print("Time 'b' is within +- one minute from the current time.")
-    order = MarketOrder('Buy', 1)
-    trade = ib.placeOrder(stock, order)
-    print(trade)
-
-
-
-# if this rsiDate is within +-1 time.now then buy it. 
-
-# if ()
-
-# order = MarketOrder('Buy', 1)
-# trade = ib.placeOrder(stock, order)
-# print(trade)
-
-
-
-
-
-
-
-
-
-
-
-# market_data = ib.reqMktData(stock, '',False,False)
-
-# def onPendingTicker(ticker):
-#     print("\npending ticker event received\n")
-#     print(ticker)
-
-# ib.pendingTickersEvent += onPendingTicker
-
-ib.run()
+# Wait for the order to be filled
+while trade.orderStatus.status != 'Filled':
+    print(trade.orderStatus.status)
+    ib.sleep(1)

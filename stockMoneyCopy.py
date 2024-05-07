@@ -7,11 +7,15 @@ import sys
 from rsi_minute import *
 from truncateDate import *
 from datetime import datetime, timedelta
+from playMusic import *
 import pytz
 
 STOCK_NAME = 'TSLA'
 STOCK_QUANTITY = 12
 BUY_PRICE = 0
+GAIN = 0.005
+LOSS = 0.005
+
 #
 util.startLoop()  # uncomment this line when in a notebook
 # python3 demo.py
@@ -177,11 +181,13 @@ while not hasPosition:
             order = LimitOrder('BUY', STOCK_QUANTITY, round(BUY_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
 
             # Place the order
-            orderId = ib.placeOrder(stock, order)
-
-            # order = MarketOrder('Buy', 1)
-            # trade = ib.placeOrder(stock, order)
-            # print(trade)
+            trade = ib.placeOrder(stock, order)
+            while trade.orderStatus.status != 'Filled':
+                print(trade.orderStatus.status)
+                ib.sleep(1)
+       
+            print("*************** Order is Filled *************")
+            playMusic()
             hasPosition = True
         else:
             print("Time 'rsi' is not in +- one min time frame.")
@@ -191,21 +197,38 @@ while not hasPosition:
          continue
 
 while hasPosition: 
-    ib = IB()
-    ib.connect('127.0.0.1', 7497, clientId=1)
-    account_info = ib.accountValues()
-    positions = util.df(account_info)
-    open_positions = ib.positions()
-    for position in open_positions:        
-        print(position.contract.symbol)
-        print(STOCK_NAME)
-        print(positions_df.to_string())
+    current_price = ticker.marketPrice()
+    trade = ""
+    print(f"current price: {round(current_price,2)}")
+    if round(current_price,2) >= round(BUY_PRICE * (1+GAIN),2):
+        order = LimitOrder('SELL', STOCK_QUANTITY, round(BUY_PRICE * (1+GAIN),2))
+        print ("**** Order Submitted with GAIN ****")
+        trade = ib.placeOrder(stock, order)
+        
+        while trade.orderStatus.status != 'Filled':
+            print(trade.orderStatus.status)
+            ib.sleep(1)
+       
+        print("*************** Order is Filled *************")
+        playMusic()
+        hasPosition = False 
 
-        if (position.contract.symbol == STOCK_NAME):
-            print("submitting orders")
-            order = LimitOrder('SELL', STOCK_QUANTITY, BUY_PRICE * 1.004)
-            orderId = ib.placeOrder(stock, order)
-            hasPosition = False 
+    elif round(current_price,2) <= round(BUY_PRICE * (1-LOSS),2):
+        order = LimitOrder('SELL', STOCK_QUANTITY, round(BUY_PRICE * (1-LOSS),2))
+        print ("**** Order Submitted with LOSS ****")
+        print ("sell here! LOSS")
+        trade = ib.placeOrder(stock, order)
+        
+        while trade.orderStatus.status != 'Filled':
+            print(trade.orderStatus.status)
+            ib.sleep(1)
+       
+        print("*************** Order is Filled *************")
+        playMusic()
+        hasPosition = False 
+
+    
+    
 
 
 
