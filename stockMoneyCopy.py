@@ -4,7 +4,6 @@ from rsi import *
 from stochastic import *
 from macD import *
 import sys
-from truncateDate import *
 from datetime import datetime, timedelta
 from playMusic import *
 import pytz
