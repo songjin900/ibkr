@@ -4,7 +4,6 @@ from rsi import *
 from stochastic import *
 from macD import *
 import sys
-from rsi_minute import *
 from truncateDate import *
 from datetime import datetime, timedelta
 from playMusic import *
@@ -218,7 +217,7 @@ while hasPosition:
         print ("**** Order Submitted with LOSS ****")
         print ("sell here! LOSS")
         trade = ib.placeOrder(stock, order)
-        
+
         while trade.orderStatus.status != 'Filled':
             print(trade.orderStatus.status)
             ib.sleep(1)
