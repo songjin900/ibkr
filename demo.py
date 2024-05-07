@@ -4,8 +4,6 @@ from rsi import *
 from stochastic import *
 from macD import *
 import sys
-from rsi_minute import *
-from truncateDate import *
 from datetime import datetime, timedelta
 import pytz
 
@@ -13,6 +11,8 @@ import pytz
 # mode = daily or min
 environemnt = 'prod'
 mode = 'min'
+
+
 
 util.startLoop()  # uncomment this line when in a notebook
 # python3 demo.py
