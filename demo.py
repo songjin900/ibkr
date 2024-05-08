@@ -1,8 +1,8 @@
 from ib_insync import *
 import pandas as pd
-from rsi import *
-from stochastic import *
-from macD import *
+from indicators.rsi import *
+from indicators.stochastic import *
+from indicators.macD import *
 import sys
 from datetime import datetime, timedelta
 import pytz
