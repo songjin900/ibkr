@@ -6,6 +6,7 @@ from indicators.macD import *
 import sys
 from datetime import datetime, timedelta
 from playMusic import *
+from sqlLite.insertToStock import *
 import pytz
 
 STOCK_NAME = 'TSLA'
@@ -93,8 +94,10 @@ while True:
                 print("*****************************************Current Price:", round(BUY_PRICE,2))
                 if INITIAL_RUN or not BACK_TO_BACK: 
                     order = LimitOrder('BUY', STOCK_QUANTITY, round(BUY_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
+                    saveToDB(current_time, 'Buy', STOCK_NAME, STOCK_QUANTITY, round(BUY_PRICE,2), "RSIIndicator" )
                 elif BACK_TO_BACK:
                     order = LimitOrder('BUY', STOCK_QUANTITY * 2, round(BUY_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
+                    saveToDB(current_time, 'Buy Back_To_Back', STOCK_NAME, STOCK_QUANTITY * 2, round(BUY_PRICE,2), "RSIIndicator" )
 
                 # Place the order
                 trade = ib.placeOrder(stock, order)
@@ -125,8 +128,11 @@ while True:
 
             if BACK_TO_BACK:
                 order = LimitOrder('SELL', STOCK_QUANTITY * 2, round(current_price,2))
+                saveToDB(current_time, 'SELL Back_To_Back', STOCK_NAME, STOCK_QUANTITY*2, round(current_price,2), "RSIIndicator" )
             else:
                 order = LimitOrder('SELL', STOCK_QUANTITY, round(current_price,2))
+                saveToDB(current_time, 'SELL', STOCK_NAME, STOCK_QUANTITY, round(current_price,2), "RSIIndicator" )
+
 
             trade = ib.placeOrder(stock, order)
 
