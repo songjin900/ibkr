@@ -11,7 +11,7 @@ import pytz
 
 STOCK_NAME = 'TSLA'
 STOCK_QUANTITY = 13
-BUY_PRICE = 0
+SHORT_PRICE = 0
 
 RSI_BUY = 30
 RSI_SELL = 50
@@ -44,7 +44,6 @@ ticker = ib.reqTickers(stock)[0]  # Get the first ticker object
 print("Current Holdings:")
 print(positions_df.to_string())
 
-
 hasPosition = False
 
 loop_count = 0
@@ -59,10 +58,9 @@ while True:
         ib.sleep(1)
         
         try:
-
             ticker = ib.reqMktData(stock)
-            BUY_PRICE = ticker.marketPrice()
-            print("\nCurrent Price:", BUY_PRICE)
+            SHORT_PRICE = ticker.marketPrice()
+            print("\nCurrent Price:", SHORT_PRICE)
 
             bars = ib.reqHistoricalData(
                 stock, endDateTime='', durationStr='1 D',
@@ -73,12 +71,23 @@ while True:
             df = util.df(bars)
 
             current_rsi = rsi(df).iloc[-1]
-     
+            previous_rsi = rsi(df).iloc[-2]
+
+            if (not current_rsi or not previous_rsi):
+                print("current rsi or previous rsi not found")
+                continue
+
             rsiDate = current_rsi.Date
             rsiValue = current_rsi.RSI
+            previous_rsiValue = previous_rsi.RSI
 
             print(f"current rsi is {rsiValue}")
-            if (rsiValue > RSI_BUY):
+            print(f"previous rsi is {previous_rsiValue}")
+
+            if (rsiValue < RSI_SELL):
+                continue
+
+            if (rsiValue > previous_rsiValue):
                 continue
 
             # Get the current time  
@@ -87,17 +96,17 @@ while True:
 
             if time_difference <= timedelta(minutes = 1):
                 # Get the current price of the stock
-                BUY_PRICE = ticker.marketPrice()
+                SHORT_PRICE = ticker.marketPrice()
 
                 order = ""
 
-                print("*****************************************Current Price:", round(BUY_PRICE,2))
+                print("*****************************************Current Price:", round(SHORT_PRICE,2))
                 if INITIAL_RUN or not BACK_TO_BACK: 
-                    order = LimitOrder('BUY', STOCK_QUANTITY, round(BUY_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
-                    saveToDB(current_time, 'Buy', STOCK_NAME, STOCK_QUANTITY, round(BUY_PRICE,2), "RSIIndicator" )
+                    order = LimitOrder('SELL', STOCK_QUANTITY, round(SHORT_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
+                    saveToDB(current_time, 'SELL', STOCK_NAME, STOCK_QUANTITY, round(SHORT_PRICE,2), "rsi_shortFirst" )
                 elif BACK_TO_BACK:
-                    order = LimitOrder('BUY', STOCK_QUANTITY * 2, round(BUY_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
-                    saveToDB(current_time, 'Buy Back_To_Back', STOCK_NAME, STOCK_QUANTITY * 2, round(BUY_PRICE,2), "RSIIndicator" )
+                    order = LimitOrder('SELL', STOCK_QUANTITY * 2, round(SHORT_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
+                    saveToDB(current_time, 'SELL Back_To_Back', STOCK_NAME, STOCK_QUANTITY * 2, round(SHORT_PRICE,2), "rsi_shortFirst" )
 
                 # Place the order
                 trade = ib.placeOrder(stock, order)
@@ -123,15 +132,15 @@ while True:
         rsiValue = current_rsi.RSI
         current_price = ticker.marketPrice()
 
-        if rsiValue >= RSI_SELL:
+        if rsiValue <= RSI_BUY:
             order = ""
 
             if BACK_TO_BACK:
-                order = LimitOrder('SELL', STOCK_QUANTITY * 2, round(current_price,2))
-                saveToDB(current_time, 'SELL Back_To_Back', STOCK_NAME, STOCK_QUANTITY*2, round(current_price,2), "RSIIndicator" )
+                order = LimitOrder('BUY', STOCK_QUANTITY * 2, round(current_price,2))
+                saveToDB(current_time, 'BUY Back_To_Back', STOCK_NAME, STOCK_QUANTITY*2, round(current_price,2), "rsi_shortFirst" )
             else:
-                order = LimitOrder('SELL', STOCK_QUANTITY, round(current_price,2))
-                saveToDB(current_time, 'SELL', STOCK_NAME, STOCK_QUANTITY, round(current_price,2), "RSIIndicator" )
+                order = LimitOrder('BUY', STOCK_QUANTITY, round(current_price,2))
+                saveToDB(current_time, 'BUY', STOCK_NAME, STOCK_QUANTITY, round(current_price,2), "rsi_shortFirst" )
 
 
             trade = ib.placeOrder(stock, order)
@@ -142,9 +151,10 @@ while True:
                 ib.sleep(1)
 
             print("*************** Order is Filled *************")
-            print(f"purchased price: { round(BUY_PRICE,2)}")
-            print(f"sold price: { round(current_price,2)}")
-            if (round(BUY_PRICE,2) < round(current_price,2)):
+            print(f"sold(short) price: { round(SHORT_PRICE,2)}")
+            print(f"purchase(long) price: { round(current_price,2)}")
+
+            if (round(SHORT_PRICE,2) > round(current_price,2)):
                 print("Sold with PROFIT!!!!!!")
             else:
                 print("Sold with LOSS")
@@ -153,7 +163,7 @@ while True:
             hasPosition = False 
         else:
             print(f"current price: {round(current_price,2)}")
-            print(f"purchased price: { round(BUY_PRICE,2)}")
+            print(f"purchased price: { round(SHORT_PRICE,2)}")
             print(f"current RSI: {rsiValue}")
             print("waiting...")
             ib.sleep(1)
