@@ -1,0 +1,25 @@
+# Ignore compiled Python files
+*.pyc
+
+# Ignore virtual environment folders
+venv/
+env/
+
+# Ignore local configuration files
+config.ini
+
+# Ignore log files
+*.log
+
+# Ignore database files
+*.db
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore editor/IDE specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+__pycache__/insertToStock.cpython-312.pyc
