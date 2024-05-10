@@ -6,17 +6,17 @@ from indicators.macD import *
 import sys
 from datetime import datetime, timedelta
 from playMusic import *
-from sqlLite.insertToStock import *
+from insertToStock import *
 import pytz
 
 STOCK_NAME = 'TSLA'
-STOCK_QUANTITY = 13
+STOCK_QUANTITY = 12
 SHORT_PRICE = 0
 
-RSI_BUY = 30
-RSI_SELL = 50
+RSI_BUY = 33
+RSI_SELL = 60
 
-BACK_TO_BACK = False
+BACK_TO_BACK = True
 INITIAL_RUN = True
 
 
@@ -73,10 +73,6 @@ while True:
             current_rsi = rsi(df).iloc[-1]
             previous_rsi = rsi(df).iloc[-2]
 
-            if (not current_rsi or not previous_rsi):
-                print("current rsi or previous rsi not found")
-                continue
-
             rsiDate = current_rsi.Date
             rsiValue = current_rsi.RSI
             previous_rsiValue = previous_rsi.RSI
@@ -103,10 +99,10 @@ while True:
                 print("*****************************************Current Price:", round(SHORT_PRICE,2))
                 if INITIAL_RUN or not BACK_TO_BACK: 
                     order = LimitOrder('SELL', STOCK_QUANTITY, round(SHORT_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
-                    saveToDB(current_time, 'SELL', STOCK_NAME, STOCK_QUANTITY, round(SHORT_PRICE,2), "rsi_shortFirst" )
+                    saveToDB(current_time, 'SELL', STOCK_NAME, STOCK_QUANTITY, SHORT_PRICE, "rsi_shortFirst" )
                 elif BACK_TO_BACK:
                     order = LimitOrder('SELL', STOCK_QUANTITY * 2, round(SHORT_PRICE,2))  # Buy 100 shares of TSLA at $700 per share
-                    saveToDB(current_time, 'SELL Back_To_Back', STOCK_NAME, STOCK_QUANTITY * 2, round(SHORT_PRICE,2), "rsi_shortFirst" )
+                    saveToDB(current_time, 'SELL Back_To_Back', STOCK_NAME, STOCK_QUANTITY * 2, SHORT_PRICE, "rsi_shortFirst" )
 
                 # Place the order
                 trade = ib.placeOrder(stock, order)
@@ -126,7 +122,13 @@ while True:
         except:
             continue
 
-    while hasPosition: 
+    while hasPosition:   
+
+        bars = ib.reqHistoricalData(
+        stock, endDateTime='', durationStr='1 D',
+        barSizeSetting='1 min', whatToShow='TRADES', useRTH=True)
+
+        df = util.df(bars)
         current_rsi = rsi(df).iloc[-1]
         rsiDate = current_rsi.Date
         rsiValue = current_rsi.RSI
@@ -137,10 +139,10 @@ while True:
 
             if BACK_TO_BACK:
                 order = LimitOrder('BUY', STOCK_QUANTITY * 2, round(current_price,2))
-                saveToDB(current_time, 'BUY Back_To_Back', STOCK_NAME, STOCK_QUANTITY*2, round(current_price,2), "rsi_shortFirst" )
+                saveToDB(current_time, 'BUY Back_To_Back', STOCK_NAME, STOCK_QUANTITY*2, current_price, "rsi_shortFirst" )
             else:
                 order = LimitOrder('BUY', STOCK_QUANTITY, round(current_price,2))
-                saveToDB(current_time, 'BUY', STOCK_NAME, STOCK_QUANTITY, round(current_price,2), "rsi_shortFirst" )
+                saveToDB(current_time, 'BUY', STOCK_NAME, STOCK_QUANTITY, current_price, "rsi_shortFirst" )
 
 
             trade = ib.placeOrder(stock, order)
