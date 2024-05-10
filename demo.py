@@ -6,47 +6,34 @@ from indicators.macD import *
 import sys
 from datetime import datetime, timedelta
 import pytz
-
+from insertToStock import *
+import sqlite3
 
 # mode = daily or min
 environemnt = 'prod'
 mode = 'min'
 
+current_time = datetime.now(pytz.utc)
+STOCK_NAME = 'TSLA'
+STOCK_QUANTITY = 12
+
+SHORT_PRICE = "123.424224"
+# saveToDB("2024-05-09", 'SELL Back_To_Back', STOCK_NAME, 12, SHORT_PRICE, "rsi_shortFirst" )
+
+  # Connect to database (or create it if it doesn't exist)
+conn = sqlite3.connect('Stock.db')
+
+# Create a cursor object
+cursor = conn.cursor()
 
 
-util.startLoop()  # uncomment this line when in a notebook
-# python3 demo.py
-ib = IB()
-ib.connect('127.0.0.1', 7497, clientId=1)
 
-account_info = ib.accountValues()
-positions = util.df(account_info)
-open_positions = ib.positions()
+saveToDB("2024-05-09", 'SELL', STOCK_NAME, 12, SHORT_PRICE, "rsi_shortFirst" )
+conn.commit()
+# # Query the table
+cursor.execute("SELECT * FROM stocks")
+print(cursor.fetchall())
 
-# Convert the open positions data to a DataFrame for easier processing
-positions_df = util.df(open_positions)
-
-# Print or manipulate the DataFrame as needed
-# print("Current Holdings:")
-# print(positions_df.to_string())
-# print(positions_df)
-
-# prod: 7497, Dev: 4002
-stock = Stock('TSLA','SMART', 'USD')
-
-print("Time 'b' is within +- one minute from the current time.")
-order = MarketOrder('Buy', 1)
-trade = ib.placeOrder(stock, order)
-
-
-# # Define order status handler
-# def order_status_handler(order):
-#     print("Order status:", order.status)
-
-# # Register the order status handler
-# ib.orderStatusEvent += order_status_handler
-
-# Wait for the order to be filled
-while trade.orderStatus.status != 'Filled':
-    print(trade.orderStatus.status)
-    ib.sleep(1)
+# Close the connection
+conn.close()
+ 
