@@ -41,7 +41,7 @@ rsiDate = ""
 
 for s in stocks: 
 
-    stock = Stock(s,'SMART', 'USD')
+    stock = Stock(STOCK_NAME,'SMART', 'USD')
     ticker = ib.reqTickers(stock)[0]  # Get the first ticker object
 
     BUY_PRICE = ticker.marketPrice()
