@@ -5,7 +5,7 @@ from indicators.stochastic import *
 from indicators.macD import *
 import sys
 from datetime import datetime, timedelta
-from playMusic import *
+from setting.playMusic import *
 import pytz
 
 STOCK_NAME = 'TSLA'

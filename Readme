@@ -1,0 +1,39 @@
+Functions: 
+    1. rsi_long_function
+    2. rsi_short_function
+
+Indicators:
+    1. macD
+    2. rsi
+    3. stochastic
+
+Multithread: I don't know - review
+DB : Not working
+
+Executables:
+    -auto_rsi_trading.py
+        -infinite trading
+    -demo.py
+        -demo/testing
+    -infiniteThreeIndicators.py
+        -macD, Rsi, stochastic
+        -Infinite
+        -1 min
+        -buy->sell. no short
+    -singleThreeIndicator.py
+        -macD, RSI, stochastic
+        -Single
+        -1min
+        -buy->sell, no short
+    -rsi_longFirst.py
+        -Back to Back available
+            -i.e. Buy 100, sell 200, buy 200 sell 200 buy 200 sell 100 ...
+        -No back to back 
+            -buy 100 sell 100 buy 100 sell 100
+    -rsi_shortFirst.py
+        -opposite of rsi_longFirst
+    -rsi_macD_stoc_day.py
+        -time = day
+        -Probably can be deleted
+        -No Trading. 
+        -Print indicator value 

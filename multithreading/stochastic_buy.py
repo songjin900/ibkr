@@ -6,7 +6,7 @@ from indicators.stochastic import *
 from indicators.macD import *
 from datetime import datetime
 import pytz
-from playMusic import *
+from setting.playMusic import *
 
 showMessage = True
 

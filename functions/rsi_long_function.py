@@ -5,8 +5,8 @@ from indicators.stochastic import *
 from indicators.macD import *
 import sys
 from datetime import datetime, timedelta
-from playMusic import *
-from insertToStock import *
+from setting.playMusic import *
+from DB.insertToStock import *
 import pytz
 
 def rsi_long_function(ib, run_percentage, STOCK_NAME, STOCK_QUANTITY, RSI_BUY, RSI_SELL, BACK_TO_BACK):

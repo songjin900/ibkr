@@ -6,7 +6,7 @@ from indicators.stochastic import *
 from indicators.macD import *
 from datetime import datetime, timedelta
 import pytz
-from playMusic import *
+from setting.playMusic import *
 from multithreading.stochastic_buy import *
 from multithreading.stochastic_sell import *
 
